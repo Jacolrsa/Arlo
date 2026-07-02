@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from .. import messages
+from ..context import Context
 
 
-async def execute(ctx):
+async def execute(ctx: Context) -> None:
     """Handle the #help command."""
 
     text = (
