@@ -1,25 +1,25 @@
-"""Arlo - MeshCore Assistant."""
+"""Arlo integration."""
 
 from __future__ import annotations
 
 import logging
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN, VERSION
+from .listener import async_register
 
 _LOGGER = logging.getLogger(__name__)
 
+PLATFORMS: list[Platform] = []
+
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
-    """Set up Arlo from configuration.yaml."""
+    """Set up the Arlo integration."""
 
-    _LOGGER.info("========================================")
     _LOGGER.info("Starting Arlo %s", VERSION)
-    _LOGGER.info("========================================")
-
-    hass.data.setdefault(DOMAIN, {})
 
     return True
 
@@ -30,9 +30,17 @@ async def async_setup_entry(
 ) -> bool:
     """Set up Arlo from a config entry."""
 
-    _LOGGER.info("Setting up config entry: %s", entry.title)
+    _LOGGER.info("Setting up Arlo")
 
-    hass.data.setdefault(DOMAIN, {})
+    # Register MeshCore event listener
+    async_register(hass)
+
+    await hass.config_entries.async_forward_entry_setups(
+        entry,
+        PLATFORMS,
+    )
+
+    _LOGGER.info("Arlo is ready")
 
     return True
 
@@ -43,8 +51,12 @@ async def async_unload_entry(
 ) -> bool:
     """Unload Arlo."""
 
-    _LOGGER.info("Stopping Arlo")
+    unload_ok = await hass.config_entries.async_unload_platforms(
+        entry,
+        PLATFORMS,
+    )
 
-    hass.data.pop(DOMAIN, None)
+    if unload_ok:
+        _LOGGER.info("Arlo unloaded")
 
-    return True
+    return unload_ok
