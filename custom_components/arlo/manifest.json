@@ -1,0 +1,17 @@
+{
+  "domain": "arlo",
+  "name": "Arlo",
+  "version": "1.0.0-alpha.2",
+  "documentation": "https://github.com/Jacolrsa/Arlo",
+  "issue_tracker": "https://github.com/Jacolrsa/Arlo/issues",
+  "codeowners": [
+    "@Jacolrsa"
+  ],
+  "config_flow": true,
+  "iot_class": "local_push",
+  "integration_type": "hub",
+  "requirements": [],
+  "dependencies": [],
+  "after_dependencies": [],
+  "loggers": []
+}
