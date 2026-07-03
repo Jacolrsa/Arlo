@@ -18,15 +18,15 @@ def async_register(hass: HomeAssistant) -> None:
     async def _handle(event: Event) -> None:
         """Handle a MeshCore message event."""
 
-        _LOGGER.info("========================================")
-        _LOGGER.info("ARLO LISTENER")
-        _LOGGER.info("Received MeshCore event")
+        _LOGGER.warning("========================================")
+        _LOGGER.warning("ARLO LISTENER")
+        _LOGGER.warning("Received MeshCore event")
 
         ctx = Context.from_event(hass, event)
 
-        _LOGGER.info("Sender : %s", ctx.sender)
-        _LOGGER.info("Message: %s", ctx.message)
-        _LOGGER.info("Type   : %s", ctx.message_type)
+        _LOGGER.warning("Sender : %s", ctx.sender)
+        _LOGGER.warning("Message: %s", ctx.message)
+        _LOGGER.warning("Type   : %s", ctx.message_type)
 
         await handle_message(ctx)
 
