@@ -18,12 +18,20 @@ async def send_direct(
 ) -> None:
     """Send a direct MeshCore message."""
 
-    _LOGGER.info("========================================")
-    _LOGGER.info("ARLO MESSENGER")
-    _LOGGER.info("To      : %s", name)
-    _LOGGER.info("Pubkey  : %s", pubkey)
-    _LOGGER.info("Message : %s", message)
+    _LOGGER.warning("========================================")
+    _LOGGER.warning("ARLO MESSENGER")
+    _LOGGER.warning("To      : %s", name)
+    _LOGGER.warning("Pubkey  : %s", pubkey)
+    _LOGGER.warning("Message : %s", message)
 
-    #
-    # We will replace this later with the real MeshCore service call.
-    #
+    await hass.services.async_call(
+        "meshcore",
+        "send_message",
+        {
+            "public_key_prefix": pubkey,
+            "message": message,
+        },
+        blocking=True,
+    )
+
+    _LOGGER.warning("Message sent")
