@@ -1,34 +1,33 @@
-"""High-level messaging functions."""
+"""High-level messaging API."""
 
 from __future__ import annotations
 
-from .messenger import send_direct
+from .messenger import messenger
 
 
 async def reply(ctx, text: str) -> None:
-    """Reply to whoever sent the message."""
+    """Reply to the sender."""
 
-    await send_direct(
-        ctx.hass,
+    await messenger.send_direct(
         pubkey=ctx.pubkey,
-        name=ctx.sender,
+        recipient=ctx.sender,
         message=text,
     )
 
 
 async def success(ctx, text: str) -> None:
-    """Send a success message."""
+    """Send success message."""
 
     await reply(ctx, f"✅ {text}")
 
 
 async def error(ctx, text: str) -> None:
-    """Send an error message."""
+    """Send error message."""
 
     await reply(ctx, f"❌ {text}")
 
 
 async def info(ctx, text: str) -> None:
-    """Send an information message."""
+    """Send information message."""
 
     await reply(ctx, f"ℹ️ {text}")

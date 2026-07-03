@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN, VERSION
 from .listener import async_register
+from .messenger import messenger
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +33,14 @@ async def async_setup_entry(
 
     _LOGGER.info("Setting up Arlo")
 
-    # Register MeshCore event listener
+    #
+    # Start messenger worker
+    #
+    await messenger.start(hass)
+
+    #
+    # Register MeshCore listener
+    #
     async_register(hass)
 
     await hass.config_entries.async_forward_entry_setups(
@@ -50,6 +58,8 @@ async def async_unload_entry(
     entry: ConfigEntry,
 ) -> bool:
     """Unload Arlo."""
+
+    await messenger.stop()
 
     unload_ok = await hass.config_entries.async_unload_platforms(
         entry,
