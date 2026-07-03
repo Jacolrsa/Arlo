@@ -22,9 +22,13 @@ def async_register(hass: HomeAssistant) -> None:
         _LOGGER.warning("ARLO LISTENER")
         _LOGGER.warning("Received MeshCore event")
 
+        # <<< TEMPORARY DEBUG >>>
+        _LOGGER.warning("RAW EVENT: %s", event.data)
+
         ctx = Context.from_event(hass, event)
 
         _LOGGER.warning("Sender : %s", ctx.sender)
+        _LOGGER.warning("Pubkey : %s", ctx.pubkey)
         _LOGGER.warning("Message: %s", ctx.message)
         _LOGGER.warning("Type   : %s", ctx.message_type)
 
