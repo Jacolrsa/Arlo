@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -13,7 +12,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class EventBus:
-    """Simple internal event bus for Arlo."""
+    """Internal event bus for Arlo."""
 
     def __init__(self) -> None:
         self._message_handlers: list[
@@ -28,62 +27,52 @@ class EventBus:
         self,
         handler: Callable[[Event], Awaitable[None]],
     ) -> None:
-        """Register incoming MeshCore message handler."""
-
+        """Register incoming message handler."""
         self._message_handlers.append(handler)
 
     def register_message_sent_handler(
         self,
         handler: Callable[[dict[str, Any]], Awaitable[None]],
     ) -> None:
-        """Register outgoing MeshCore message handler."""
-
+        """Register outgoing message handler."""
         self._message_sent_handlers.append(handler)
 
-    async def dispatch_message(
-        self,
-        event: Event,
-    ) -> None:
-        """Dispatch an incoming message."""
-
+    async def _dispatch_message(self, event: Event) -> None:
+        """Dispatch incoming MeshCore message."""
         for handler in self._message_handlers:
             try:
                 await handler(event)
             except Exception:
-                _LOGGER.exception("Message handler failed")
+                _LOGGER.exception("Incoming message handler failed")
 
-    async def dispatch_message_sent(
-        self,
-        data: dict[str, Any],
-    ) -> None:
-        """Dispatch an outgoing message event."""
-
+    async def _dispatch_message_sent(self, event: Event) -> None:
+        """Dispatch outgoing MeshCore message."""
         for handler in self._message_sent_handlers:
             try:
-                await handler(data)
+                await handler(event.data)
             except Exception:
-                _LOGGER.exception("Message sent handler failed")
+                _LOGGER.exception("Outgoing message handler failed")
 
     def register_with_homeassistant(
         self,
         hass: HomeAssistant,
     ) -> None:
-        """Register Home Assistant listeners."""
+        """Register Home Assistant event listeners."""
 
-        async def _message(event: Event) -> None:
-            await self.dispatch_message(event)
+        async def message_listener(event: Event) -> None:
+            await self._dispatch_message(event)
 
-        async def _message_sent(event: Event) -> None:
-            await self.dispatch_message_sent(event.data)
+        async def message_sent_listener(event: Event) -> None:
+            await self._dispatch_message_sent(event)
 
         hass.bus.async_listen(
             "meshcore_message",
-            lambda event: asyncio.create_task(_message(event)),
+            message_listener,
         )
 
         hass.bus.async_listen(
             "meshcore_message_sent",
-            lambda event: asyncio.create_task(_message_sent(event)),
+            message_sent_listener,
         )
 
         _LOGGER.info("Arlo event bus registered")
