@@ -5,10 +5,10 @@ from __future__ import annotations
 from .messenger import send_direct
 
 
-def reply(ctx, text: str):
+async def reply(ctx, text: str) -> None:
     """Reply to whoever sent the message."""
 
-    send_direct(
+    await send_direct(
         ctx.hass,
         pubkey=ctx.pubkey,
         name=ctx.sender,
@@ -16,19 +16,19 @@ def reply(ctx, text: str):
     )
 
 
-def success(ctx, text: str):
+async def success(ctx, text: str) -> None:
     """Send a success message."""
 
-    reply(ctx, f"✅ {text}")
+    await reply(ctx, f"✅ {text}")
 
 
-def error(ctx, text: str):
+async def error(ctx, text: str) -> None:
     """Send an error message."""
 
-    reply(ctx, f"❌ {text}")
+    await reply(ctx, f"❌ {text}")
 
 
-def info(ctx, text: str):
+async def info(ctx, text: str) -> None:
     """Send an information message."""
 
-    reply(ctx, f"ℹ️ {text}")
+    await reply(ctx, f"ℹ️ {text}")

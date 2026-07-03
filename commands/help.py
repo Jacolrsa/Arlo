@@ -16,4 +16,4 @@ async def execute(ctx: Context) -> None:
         "#leaderboard"
     )
 
-    messages.reply(ctx, text)
+    await messages.reply(ctx, text)
