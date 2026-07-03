@@ -8,7 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import VERSION
+from .const import DOMAIN, VERSION
 from .listener import async_register
 from .messenger import messenger
 from .storage import async_setup_storage
@@ -34,6 +34,9 @@ async def async_setup_entry(
 
     _LOGGER.info("Setting up Arlo")
 
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN].setdefault(entry.entry_id, {})
+
     #
     # Initialize persistent storage
     #
@@ -47,7 +50,9 @@ async def async_setup_entry(
     #
     # Register MeshCore listener
     #
-    async_register(hass)
+    hass.data[DOMAIN][entry.entry_id]["unregister_listener"] = async_register(
+        hass,
+    )
 
     await hass.config_entries.async_forward_entry_setups(
         entry,
@@ -65,6 +70,12 @@ async def async_unload_entry(
 ) -> bool:
     """Unload Arlo."""
 
+    entry_data = hass.data.get(DOMAIN, {}).get(entry.entry_id, {})
+    unregister_listener = entry_data.pop("unregister_listener", None)
+
+    if unregister_listener is not None:
+        unregister_listener()
+
     await messenger.stop()
 
     unload_ok = await hass.config_entries.async_unload_platforms(
@@ -73,6 +84,11 @@ async def async_unload_entry(
     )
 
     if unload_ok:
+        hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+
+        if not hass.data.get(DOMAIN):
+            hass.data.pop(DOMAIN, None)
+
         _LOGGER.info("Arlo unloaded")
 
     return unload_ok

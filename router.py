@@ -1,10 +1,8 @@
-from .commands import help
-from .commands import meshcoremonday
+"""Arlo message router."""
 
-DIRECT_COMMANDS = {
-    help.COMMAND: help,
-    meshcoremonday.COMMAND: meshcoremonday,
-}
+from __future__ import annotations
+
+from .registry import get_direct_command
 
 
 async def handle_message(ctx):
@@ -13,7 +11,7 @@ async def handle_message(ctx):
     if ctx.sender == "Arlo":
         return
 
-    command = DIRECT_COMMANDS.get(ctx.message.strip().lower())
+    command = get_direct_command(ctx.message.strip())
 
     if command:
         await command.execute(ctx)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from .. import messages
 from ..context import Context
-from ..storage import storage
+from ..storage import get_storage
 
 COMMAND = "#meshcoremonday"
 
@@ -12,16 +12,18 @@ COMMAND = "#meshcoremonday"
 async def execute(ctx: Context) -> None:
     """Handle the #meshcoremonday command."""
 
-    if storage is None:
+    storage_service = get_storage()
+
+    if storage_service is None:
         await messages.reply(ctx, "❌ Storage is not ready.")
         return
 
-    await storage.register_user(
+    await storage_service.register_user(
         pubkey=ctx.pubkey,
         name=ctx.sender,
     )
 
-    user = storage.get_user(ctx.pubkey)
+    user = storage_service.get_user(ctx.pubkey)
 
     await messages.reply(
         ctx,

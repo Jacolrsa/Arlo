@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
 from homeassistant.core import Event, HomeAssistant
 
@@ -13,14 +14,17 @@ from .router import handle_message
 _LOGGER = logging.getLogger(__name__)
 
 
-async def _incoming_message(event: Event) -> None:
+async def _incoming_message(
+    hass: HomeAssistant,
+    event: Event,
+) -> None:
     """Handle incoming MeshCore messages."""
 
     _LOGGER.warning("========================================")
     _LOGGER.warning("ARLO LISTENER")
     _LOGGER.warning("Received MeshCore event")
 
-    ctx = Context.from_event(None, event)
+    ctx = Context.from_event(hass, event)
 
     _LOGGER.warning("Sender : %s", ctx.sender)
     _LOGGER.warning("Pubkey : %s", ctx.pubkey)
@@ -41,12 +45,23 @@ async def _message_sent(data: dict) -> None:
     _LOGGER.warning("Send ID  : %s", data.get("send_id"))
 
 
-def async_register(hass: HomeAssistant) -> None:
+def async_register(hass: HomeAssistant) -> Callable[[], None]:
     """Register Arlo listeners."""
 
-    events.register_message_handler(_incoming_message)
-    events.register_message_sent_handler(_message_sent)
+    async def incoming_message(event: Event) -> None:
+        await _incoming_message(hass, event)
+
+    unregister_message = events.register_message_handler(incoming_message)
+    unregister_message_sent = events.register_message_sent_handler(_message_sent)
 
     events.register_with_homeassistant(hass)
 
+    def unregister() -> None:
+        unregister_message()
+        unregister_message_sent()
+        events.unregister_from_homeassistant()
+        _LOGGER.info("Arlo listeners unregistered")
+
     _LOGGER.info("Arlo listeners registered")
+
+    return unregister

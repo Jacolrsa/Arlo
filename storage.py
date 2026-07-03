@@ -88,6 +88,12 @@ class ArloStorage:
 storage: ArloStorage | None = None
 
 
+def get_storage() -> ArloStorage | None:
+    """Return the active Arlo storage instance."""
+
+    return storage
+
+
 async def async_setup_storage(
     hass: HomeAssistant,
 ) -> ArloStorage:

@@ -41,7 +41,7 @@ class Messenger:
         self._hass = hass
 
         if self._worker is None:
-            self._worker = asyncio.create_task(self._run())
+            self._worker = hass.async_create_task(self._run())
             _LOGGER.info("Messenger worker started")
 
     async def stop(self) -> None:
@@ -56,6 +56,7 @@ class Messenger:
                 pass
 
             self._worker = None
+            self._hass = None
 
             _LOGGER.info("Messenger worker stopped")
 
@@ -67,6 +68,9 @@ class Messenger:
         message: str,
     ) -> None:
         """Queue a direct message."""
+
+        if self._hass is None or self._worker is None:
+            raise RuntimeError("Messenger has not been started")
 
         item = QueuedMessage(
             pubkey=pubkey,
@@ -84,6 +88,9 @@ class Messenger:
 
     async def _run(self) -> None:
         """Background queue worker."""
+
+        if self._hass is None:
+            raise RuntimeError("Messenger has not been started")
 
         while True:
 

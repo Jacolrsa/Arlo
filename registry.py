@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from .commands import help
+from .commands import meshcoremonday
 
 #
 # Direct message commands
 #
 
 _DIRECT_COMMANDS = {
-    "#help": help,
+    help.COMMAND: help,
+    meshcoremonday.COMMAND: meshcoremonday,
 }
 
 #
