@@ -1,48 +1,32 @@
 """MeshCore Monday command."""
 
-from .. import storage, messages
+from __future__ import annotations
 
+from .. import messages
+from ..context import Context
+from ..storage import storage
 
 COMMAND = "#meshcoremonday"
 
 
-async def execute(ctx):
-    """Handle #meshcoremonday."""
+async def execute(ctx: Context) -> None:
+    """Handle the #meshcoremonday command."""
 
-    pubkey = ctx.pubkey
-    name = ctx.sender
-
-    users = await storage.get_users(ctx.hass)
-
-    user = users.get(pubkey)
-
-    if user is None:
-        user = {
-            "name": name,
-            "points": 1,
-            "checkins": 1,
-            "streak": 1,
-        }
-
-        users[pubkey] = user
-
-        await storage.save_users(ctx.hass, users)
-
-        await messages.reply(
-            ctx,
-            f"✅ Welcome to MeshCore Monday!\n\n"
-            f"You are participant #{len(users)}."
-        )
+    if storage is None:
+        await messages.reply(ctx, "❌ Storage is not ready.")
         return
 
-    user["name"] = name
-    user["points"] += 1
-    user["checkins"] += 1
+    await storage.register_user(
+        pubkey=ctx.pubkey,
+        name=ctx.sender,
+    )
 
-    await storage.save_users(ctx.hass, users)
+    user = storage.get_user(ctx.pubkey)
 
     await messages.reply(
         ctx,
-        f"✅ Check-in recorded.\n\n"
-        f"Points: {user['points']}"
+        "✅ Welcome to MeshCore Monday!\n\n"
+        f"Callsign: {user['name']}\n"
+        f"Joined: {user['joined']}\n"
+        f"Total check-ins: {user['total_checkins']}"
     )
