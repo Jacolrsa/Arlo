@@ -5,6 +5,8 @@ from __future__ import annotations
 from .. import messages
 from ..context import Context
 
+COMMAND = "#help"
+
 
 async def execute(ctx: Context) -> None:
     """Handle the #help command."""
@@ -13,7 +15,7 @@ async def execute(ctx: Context) -> None:
         "📟 Arlo\n\n"
         "Available commands:\n"
         "#help\n"
-        "#leaderboard"
+        "#meshcoremonday"
     )
 
     await messages.reply(ctx, text)
