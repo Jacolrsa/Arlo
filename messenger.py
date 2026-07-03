@@ -28,7 +28,7 @@ async def send_direct(
         "meshcore",
         "send_message",
         {
-            "public_key_prefix": pubkey,
+            "pubkey_prefix": pubkey,
             "message": message,
         },
         blocking=True,
