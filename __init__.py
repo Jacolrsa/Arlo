@@ -8,9 +8,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN, VERSION
+from .const import VERSION
 from .listener import async_register
 from .messenger import messenger
+from .storage import async_setup_storage
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,6 +33,11 @@ async def async_setup_entry(
     """Set up Arlo from a config entry."""
 
     _LOGGER.info("Setting up Arlo")
+
+    #
+    # Initialize persistent storage
+    #
+    await async_setup_storage(hass)
 
     #
     # Start messenger worker
