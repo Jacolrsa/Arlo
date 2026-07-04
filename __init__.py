@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
@@ -18,7 +19,10 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = []
 
 
-async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+async def async_setup(
+    hass: HomeAssistant,
+    config: dict[str, Any],
+) -> bool:
     """Set up the Arlo integration."""
 
     _LOGGER.info("Starting Arlo %s", VERSION)
@@ -37,19 +41,9 @@ async def async_setup_entry(
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN].setdefault(entry.entry_id, {})
 
-    #
-    # Initialize persistent storage
-    #
     await async_setup_storage(hass)
-
-    #
-    # Start messenger worker
-    #
     await messenger.start(hass, entry)
 
-    #
-    # Register MeshCore listener
-    #
     hass.data[DOMAIN][entry.entry_id]["unregister_listener"] = async_register(
         hass,
     )
