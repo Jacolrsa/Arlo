@@ -31,7 +31,28 @@ async def _incoming_message(
     _LOGGER.warning("Message: %s", ctx.message)
     _LOGGER.warning("Type   : %s", ctx.message_type)
 
-    await handle_message(ctx)
+    _LOGGER.warning(
+        "Dispatching to router: message=%r type=%r sender=%r channel_idx=%s",
+        ctx.message,
+        ctx.message_type,
+        ctx.sender,
+        ctx.channel_idx,
+    )
+
+    try:
+        await handle_message(ctx)
+    except Exception:
+        _LOGGER.exception(
+            "Router dispatch failed: message=%r type=%r sender=%r "
+            "channel_idx=%s",
+            ctx.message,
+            ctx.message_type,
+            ctx.sender,
+            ctx.channel_idx,
+        )
+        raise
+
+    _LOGGER.warning("Router returned successfully")
 
 
 async def _message_sent(data: dict) -> None:
