@@ -1,0 +1,4 @@
+meshcore_monday_stats:
+  name: MeshCore Monday stats
+  description: Create a persistent notification containing copyable MeshCore Monday statistics.
+  fields: {}

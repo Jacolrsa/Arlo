@@ -114,6 +114,14 @@ class ArloStorage:
 
         return None
 
+    def get_meshcore_monday_stats_data(self) -> dict:
+        """Return MeshCore Monday data for statistics."""
+
+        return {
+            "users": copy.deepcopy(self._data["users"]),
+            "checkins": copy.deepcopy(self._meshcore_monday_checkins()),
+        }
+
     async def record_meshcore_monday_checkin(
         self,
         *,

@@ -12,6 +12,8 @@ from homeassistant.core import HomeAssistant
 from .const import DOMAIN, VERSION
 from .listener import async_register
 from .messenger import messenger
+from .services import async_setup_services
+from .services import async_unload_services
 from .storage import async_setup_storage
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +44,7 @@ async def async_setup_entry(
     hass.data[DOMAIN].setdefault(entry.entry_id, {})
 
     await async_setup_storage(hass)
+    await async_setup_services(hass)
     await messenger.start(hass, entry)
 
     hass.data[DOMAIN][entry.entry_id]["unregister_listener"] = async_register(
@@ -71,6 +74,7 @@ async def async_unload_entry(
         unregister_listener()
 
     await messenger.stop()
+    await async_unload_services(hass)
 
     unload_ok = await hass.config_entries.async_unload_platforms(
         entry,
