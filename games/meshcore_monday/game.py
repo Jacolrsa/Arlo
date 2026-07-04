@@ -22,10 +22,10 @@ async def handle_command(
     """Handle a MeshCore Monday command."""
 
     today = _today()
-    channel_check_passed = ctx.channel_idx == MESHCORE_MONDAY_CHANNEL
+    channel_check_passed = ctx.is_channel
 
     _LOGGER.info(
-        "MeshCore Monday diagnostic: channel_idx=%s channel_1_check_passed=%s",
+        "MeshCore Monday diagnostic: channel_idx=%s channel_check_passed=%s",
         ctx.channel_idx,
         channel_check_passed,
     )
