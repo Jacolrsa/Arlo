@@ -51,14 +51,17 @@ async def handle_command(
     if not channel_check_passed:
         await messages.reply(
             ctx,
-            "MeshCore Monday check-ins must be performed from a MeshCore channel.",
+            "📟 MeshCore Monday\n\n"
+            "ℹ️ Please check in from any MeshCore channel.",
         )
         return
 
     if not monday_check_passed:
         await messages.reply(
             ctx,
-            "MeshCore Monday check-ins are only available on Mondays.",
+            "📟 MeshCore Monday\n\n"
+            "⏳ MeshCore Monday check-ins are only open on Mondays.\n\n"
+            "Have a great week! 📻",
         )
         return
 
@@ -74,9 +77,20 @@ async def handle_command(
     )
 
     if duplicate_checkin:
+        position = storage.get_meshcore_monday_position(
+            pubkey=ctx.pubkey,
+            monday_id=monday_id,
+        )
+        user = storage.get_user(ctx.pubkey) or {}
+        current_streak = user.get("current_streak", 0)
+
         await messages.reply(
             ctx,
-            "You have already checked in this week.",
+            "📟 MeshCore Monday\n\n"
+            "✅ You've already checked in this week.\n\n"
+            f"🏅 You were the #{position} check-in this week.\n\n"
+            f"🔥 Current streak: {current_streak} {_week_label(current_streak)}\n\n"
+            "Have a great Monday and an awesome week! 📻",
         )
         return
 
@@ -94,20 +108,26 @@ async def handle_command(
     )
     user = storage.get_user(ctx.pubkey) or {}
     total_checkins = user.get("total_checkins", 0)
+    current_streak = user.get("current_streak", 0)
     channel_idx = _meshcore_monday_channel(ctx)
+    medal = _medal(position)
 
     await messages.channel(
         channel_idx,
-        f"{ctx.sender} checked in.\n\n"
-        f"You are currently #{position} this week.",
+        "📟 MeshCore Monday\n\n"
+        f"{medal} {ctx.sender} is #{position} to check in this week!\n\n"
+        f"🔥 Streak: {current_streak} {_week_label(current_streak)}\n\n"
+        f"👥 {position} {_participant_label(position)} so far.",
     )
 
     await messages.reply(
         ctx,
-        "MeshCore Monday check-in succeeded.\n\n"
-        f"You are currently #{position} this week.\n"
-        f"Total check-ins: {total_checkins}\n"
-        "Current streak: TODO",
+        "📟 MeshCore Monday\n\n"
+        "✅ Check-in complete!\n\n"
+        f"🏅 You were the #{position} check-in this week!\n\n"
+        f"🔥 Current streak: {current_streak} {_week_label(current_streak)}\n\n"
+        f"📅 Total check-ins: {total_checkins}\n\n"
+        "Have a great Monday and an awesome week! 📻",
     )
 
 
@@ -121,6 +141,39 @@ def _is_monday(day: date) -> bool:
     """Return true if the date is Monday."""
 
     return day.weekday() == 0
+
+
+def _medal(position: int | None) -> str:
+    """Return the display medal for a weekly position."""
+
+    if position == 1:
+        return "🥇"
+
+    if position == 2:
+        return "🥈"
+
+    if position == 3:
+        return "🥉"
+
+    return "🏅"
+
+
+def _week_label(count: int) -> str:
+    """Return singular or plural week label."""
+
+    if count == 1:
+        return "week"
+
+    return "weeks"
+
+
+def _participant_label(count: int | None) -> str:
+    """Return singular or plural participant label."""
+
+    if count == 1:
+        return "participant"
+
+    return "participants"
 
 
 def _disable_monday_check(ctx: Context) -> bool:
