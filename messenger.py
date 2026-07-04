@@ -21,9 +21,11 @@ RETRY_DELAY = 5.0
 class QueuedMessage:
     """Outgoing message."""
 
-    pubkey: str
-    recipient: str
     message: str
+    message_type: str
+    pubkey: str | None = None
+    recipient: str | None = None
+    channel_idx: int | None = None
     retries: int = 0
     created: datetime = field(default_factory=datetime.now)
 
@@ -82,6 +84,7 @@ class Messenger:
             raise RuntimeError("Messenger has not been started")
 
         item = QueuedMessage(
+            message_type="direct",
             pubkey=pubkey,
             recipient=recipient,
             message=message,
@@ -92,6 +95,31 @@ class Messenger:
         _LOGGER.info(
             "Queued message for %s (%d waiting)",
             recipient,
+            self._queue.qsize(),
+        )
+
+    async def send_channel(
+        self,
+        *,
+        channel_idx: int,
+        message: str,
+    ) -> None:
+        """Queue a channel message."""
+
+        if self._hass is None or self._worker is None:
+            raise RuntimeError("Messenger has not been started")
+
+        item = QueuedMessage(
+            message_type="channel",
+            channel_idx=channel_idx,
+            message=message,
+        )
+
+        await self._queue.put(item)
+
+        _LOGGER.info(
+            "Queued channel message for %s (%d waiting)",
+            channel_idx,
             self._queue.qsize(),
         )
 
@@ -108,23 +136,39 @@ class Messenger:
 
                 try:
 
+                    target = item.recipient
+
+                    if item.message_type == "channel":
+                        target = f"channel {item.channel_idx}"
+
                     _LOGGER.info(
                         "Sending to %s (attempt %d)",
-                        item.recipient,
+                        target,
                         item.retries + 1,
                     )
 
                     await asyncio.sleep(TX_DELAY)
 
-                    await self._hass.services.async_call(
-                        "meshcore",
-                        "send_message",
-                        {
-                            "pubkey_prefix": item.pubkey,
-                            "message": item.message,
-                        },
-                        blocking=True,
-                    )
+                    if item.message_type == "channel":
+                        await self._hass.services.async_call(
+                            "meshcore",
+                            "send_channel_message",
+                            {
+                                "channel_idx": item.channel_idx,
+                                "message": item.message,
+                            },
+                            blocking=True,
+                        )
+                    else:
+                        await self._hass.services.async_call(
+                            "meshcore",
+                            "send_message",
+                            {
+                                "pubkey_prefix": item.pubkey,
+                                "message": item.message,
+                            },
+                            blocking=True,
+                        )
 
                     _LOGGER.info("Message sent successfully")
 

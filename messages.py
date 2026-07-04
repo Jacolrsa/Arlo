@@ -15,6 +15,15 @@ async def reply(ctx, text: str) -> None:
     )
 
 
+async def channel(channel_idx: int, text: str) -> None:
+    """Send a message to a channel."""
+
+    await messenger.send_channel(
+        channel_idx=channel_idx,
+        message=text,
+    )
+
+
 async def success(ctx, text: str) -> None:
     """Send success message."""
 

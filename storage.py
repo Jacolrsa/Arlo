@@ -98,6 +98,22 @@ class ArloStorage:
 
         return pubkey in self._meshcore_monday_checkins().get(monday_id, {})
 
+    def get_meshcore_monday_position(
+        self,
+        *,
+        pubkey: str,
+        monday_id: str,
+    ) -> int | None:
+        """Return a player's MeshCore Monday position."""
+
+        monday_checkins = self._meshcore_monday_checkins().get(monday_id, {})
+
+        for position, checked_in_pubkey in enumerate(monday_checkins, start=1):
+            if checked_in_pubkey == pubkey:
+                return position
+
+        return None
+
     async def record_meshcore_monday_checkin(
         self,
         *,
