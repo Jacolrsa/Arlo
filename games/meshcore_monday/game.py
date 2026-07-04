@@ -29,11 +29,17 @@ async def handle_command(
     """Handle a MeshCore Monday command."""
 
     today = _today()
-    channel_check_passed = ctx.is_channel
+    meshcore_monday_channel = _meshcore_monday_channel(ctx)
+    channel_check_passed = (
+        ctx.is_channel
+        and ctx.channel_idx == meshcore_monday_channel
+    )
 
     _LOGGER.warning(
-        "MeshCore Monday diagnostic: channel_idx=%s channel_check_passed=%s",
+        "MeshCore Monday diagnostic: channel_idx=%s "
+        "meshcore_monday_channel=%s channel_check_passed=%s",
         ctx.channel_idx,
+        meshcore_monday_channel,
         channel_check_passed,
     )
 
@@ -53,7 +59,8 @@ async def handle_command(
         await messages.reply(
             ctx,
             "📟 MeshCore Monday\n\n"
-            "ℹ️ Please check in from any MeshCore channel.",
+            "ℹ️ MeshCore Monday check-ins must be done from the configured "
+            "MeshCore Monday channel.",
         )
         return
 
@@ -110,11 +117,10 @@ async def handle_command(
     user = storage.get_user(ctx.pubkey) or {}
     total_checkins = user.get("total_checkins", 0)
     current_streak = user.get("current_streak", 0)
-    channel_idx = _meshcore_monday_channel(ctx)
     medal = _medal(position)
 
     await messages.channel(
-        channel_idx,
+        meshcore_monday_channel,
         "📟 MeshCore Monday\n\n"
         f"{medal} {ctx.sender} is #{position} to check in this week!\n\n"
         f"🔥 Streak: {current_streak} {_week_label(current_streak)}\n\n"

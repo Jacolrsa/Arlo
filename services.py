@@ -75,23 +75,23 @@ def _build_meshcore_monday_stats(data: dict[str, Any], today: date) -> str:
             "This week",
             f"ISO year/week: {iso_year}-W{iso_week:02d}",
             f"Total check-ins: {len(week_checkins)}",
-            "First 5 check-ins:",
-            *_format_ranked_checkins(week_checkins[:5]),
-            "Top 5 streaks:",
+            "All check-ins:",
+            *_format_ranked_checkins(week_checkins),
+            "All streaks:",
             *_format_user_field(users, "current_streak", "week"),
             "",
             "This month",
             f"Total check-ins: {len(month_checkins)}",
             f"Unique players: {len({item['pubkey'] for item in month_checkins})}",
-            "Top 5 players by check-ins:",
+            "All players by check-ins:",
             *_format_counter(_count_by_player(month_checkins), users),
             "",
             "Lifetime",
             f"Total check-ins: {len(lifetime_checkins)}",
             f"Total players: {len({item['pubkey'] for item in lifetime_checkins})}",
-            "Top 5 total check-ins:",
+            "All total check-ins:",
             *_format_user_field(users, "total_checkins", "check-in"),
-            "Top 5 longest streaks:",
+            "All longest streaks:",
             *_format_user_field(users, "best_streak", "week"),
         ]
     )
@@ -185,7 +185,7 @@ def _format_user_field(
     return [
         f"{index}. {user.get('name', 'Unknown')} - "
         f"{user.get(field, 0)} {_plural(label, user.get(field, 0))}"
-        for index, user in enumerate(ranked[:5], start=1)
+        for index, user in enumerate(ranked, start=1)
     ]
 
 
@@ -206,7 +206,7 @@ def _format_counter(
 
     lines = []
 
-    for index, (pubkey, count) in enumerate(counter.most_common(5), start=1):
+    for index, (pubkey, count) in enumerate(counter.most_common(), start=1):
         user = users.get(pubkey, {})
         name = user.get("name", pubkey)
         lines.append(f"{index}. {name} - {count} {_plural('check-in', count)}")
