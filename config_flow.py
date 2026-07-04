@@ -10,9 +10,12 @@ from homeassistant.core import callback
 
 from .const import DEFAULT_DISABLE_MONDAY_CHECK
 from .const import DEFAULT_MESHCORE_MONDAY_CHANNEL
+from .const import DEFAULT_RESET_MESHCORE_MONDAY_DATA
 from .const import DOMAIN
 from .const import OPTION_DISABLE_MONDAY_CHECK
 from .const import OPTION_MESHCORE_MONDAY_CHANNEL
+from .const import OPTION_RESET_MESHCORE_MONDAY_DATA
+from .storage import get_storage
 
 
 class ArloConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -56,6 +59,16 @@ class ArloOptionsFlow(config_entries.OptionsFlow):
         """Manage Arlo options."""
 
         if user_input is not None:
+            if user_input.get(OPTION_RESET_MESHCORE_MONDAY_DATA):
+                storage = get_storage()
+
+                if storage is not None:
+                    await storage.reset_meshcore_monday_data()
+
+            user_input[OPTION_RESET_MESHCORE_MONDAY_DATA] = (
+                DEFAULT_RESET_MESHCORE_MONDAY_DATA
+            )
+
             return self.async_create_entry(
                 title="",
                 data=user_input,
@@ -81,6 +94,10 @@ class ArloOptionsFlow(config_entries.OptionsFlow):
                             DEFAULT_MESHCORE_MONDAY_CHANNEL,
                         ),
                     ): int,
+                    vol.Optional(
+                        OPTION_RESET_MESHCORE_MONDAY_DATA,
+                        default=DEFAULT_RESET_MESHCORE_MONDAY_DATA,
+                    ): bool,
                 }
             ),
         )

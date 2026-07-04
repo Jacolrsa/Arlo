@@ -142,6 +142,21 @@ class ArloStorage:
 
         await self.save()
 
+    async def reset_meshcore_monday_data(self) -> None:
+        """Clear MeshCore Monday test data."""
+
+        self._data["meshcore_monday"] = {
+            "checkins": {},
+        }
+
+        for user in self._data["users"].values():
+            user["total_checkins"] = 0
+            user["current_streak"] = 0
+            user["best_streak"] = 0
+            user.pop("last_checkin", None)
+
+        await self.save()
+
     def _meshcore_monday_checkins(self) -> dict:
         """Return MeshCore Monday check-in storage."""
 
