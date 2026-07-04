@@ -24,7 +24,7 @@ async def handle_command(
     today = _today()
     channel_check_passed = ctx.is_channel
 
-    _LOGGER.info(
+    _LOGGER.warning(
         "MeshCore Monday diagnostic: channel_idx=%s channel_check_passed=%s",
         ctx.channel_idx,
         channel_check_passed,
@@ -32,7 +32,7 @@ async def handle_command(
 
     monday_check_passed = _is_monday(today)
 
-    _LOGGER.info(
+    _LOGGER.warning(
         "MeshCore Monday diagnostic: local_date=%s weekday=%s monday_check_passed=%s",
         today.isoformat(),
         today.weekday(),
@@ -51,7 +51,7 @@ async def handle_command(
         monday_id=monday_id,
     )
 
-    _LOGGER.info(
+    _LOGGER.warning(
         "MeshCore Monday diagnostic: duplicate_checkin_detected=%s",
         duplicate_checkin,
     )
@@ -65,7 +65,7 @@ async def handle_command(
         monday_id=monday_id,
     )
 
-    _LOGGER.info("MeshCore Monday diagnostic: checkin_recorded=True")
+    _LOGGER.warning("MeshCore Monday diagnostic: checkin_recorded=True")
 
 
 def _today() -> date:

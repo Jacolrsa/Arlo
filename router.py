@@ -20,7 +20,7 @@ async def handle_message(ctx):
     direct_command = get_direct_command(message)
     channel_command = get_channel_command(message)
 
-    _LOGGER.info(
+    _LOGGER.warning(
         "Router diagnostic: incoming_message=%r message_type=%r "
         "is_direct=%s is_channel=%s command=%r",
         ctx.message,
@@ -30,7 +30,7 @@ async def handle_message(ctx):
         message,
     )
 
-    _LOGGER.info(
+    _LOGGER.warning(
         "Router diagnostic: direct_command_matched=%s "
         "channel_command_matched=%s",
         direct_command is not None,
@@ -42,7 +42,7 @@ async def handle_message(ctx):
     else:
         command = direct_command
 
-    _LOGGER.info(
+    _LOGGER.warning(
         "Router diagnostic: selected_handler=%s",
         getattr(command, "__name__", None),
     )
@@ -50,7 +50,7 @@ async def handle_message(ctx):
     if command:
         await command.execute(ctx)
     else:
-        _LOGGER.info(
+        _LOGGER.warning(
             "Router diagnostic: no handler found for command=%r "
             "message_type=%r direct_match=%s channel_match=%s",
             message,
