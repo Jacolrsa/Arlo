@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from datetime import date
 
@@ -119,6 +120,8 @@ async def handle_command(
         f"🔥 Streak: {current_streak} {_week_label(current_streak)}\n\n"
         f"👥 {position} {_participant_label(position)} so far.",
     )
+
+    await asyncio.sleep(8)
 
     await messages.reply(
         ctx,
