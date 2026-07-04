@@ -31,6 +31,18 @@ async def _incoming_message(
     _LOGGER.warning("Message: %s", ctx.message)
     _LOGGER.warning("Type   : %s", ctx.message_type)
 
+    if ctx.is_channel:
+        channel_data = {
+            key: value
+            for key, value in event.data.items()
+            if "channel" in key.lower()
+        }
+
+        _LOGGER.warning("Channel name : %s", ctx.channel)
+        _LOGGER.warning("Channel index: %s", ctx.channel_idx)
+        _LOGGER.warning("Channel keys : %r", channel_data)
+        _LOGGER.warning("Full event   : %r", event.data)
+
     _LOGGER.warning(
         "Dispatching to router: message=%r type=%r sender=%r channel_idx=%s",
         ctx.message,
