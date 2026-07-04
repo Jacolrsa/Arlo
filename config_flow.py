@@ -47,7 +47,7 @@ class ArloOptionsFlow(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
 
-        self.config_entry = config_entry
+        self._config_entry = config_entry
 
     async def async_step_init(
         self,
@@ -61,7 +61,7 @@ class ArloOptionsFlow(config_entries.OptionsFlow):
                 data=user_input,
             )
 
-        options = self.config_entry.options
+        options = self._config_entry.options
 
         return self.async_show_form(
             step_id="init",
