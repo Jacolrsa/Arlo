@@ -92,6 +92,15 @@ class Messenger:
 
         await self._queue.put(item)
 
+        _LOGGER.warning(
+            "Messenger diagnostic: queued direct message recipient=%r "
+            "pubkey_present=%s pubkey_length=%s queue_size=%s",
+            recipient,
+            bool(pubkey),
+            len(pubkey) if pubkey is not None else 0,
+            self._queue.qsize(),
+        )
+
         _LOGGER.info(
             "Queued message for %s (%d waiting)",
             recipient,
@@ -160,6 +169,14 @@ class Messenger:
                             blocking=True,
                         )
                     else:
+                        _LOGGER.warning(
+                            "Messenger diagnostic: calling meshcore.send_message "
+                            "recipient=%r pubkey_present=%s pubkey_length=%s",
+                            item.recipient,
+                            bool(item.pubkey),
+                            len(item.pubkey) if item.pubkey is not None else 0,
+                        )
+
                         await self._hass.services.async_call(
                             "meshcore",
                             "send_message",
@@ -168,6 +185,14 @@ class Messenger:
                                 "message": item.message,
                             },
                             blocking=True,
+                        )
+
+                        _LOGGER.warning(
+                            "Messenger diagnostic: meshcore.send_message returned "
+                            "recipient=%r pubkey_present=%s pubkey_length=%s",
+                            item.recipient,
+                            bool(item.pubkey),
+                            len(item.pubkey) if item.pubkey is not None else 0,
                         )
 
                     _LOGGER.info("Message sent successfully")

@@ -123,6 +123,13 @@ async def handle_command(
 
     await asyncio.sleep(8)
 
+    _LOGGER.warning(
+        "MeshCore Monday diagnostic: sending private success reply "
+        "sender=%r pubkey=%r",
+        ctx.sender,
+        ctx.pubkey,
+    )
+
     await messages.reply(
         ctx,
         "📟 MeshCore Monday\n\n"
@@ -131,6 +138,13 @@ async def handle_command(
         f"🔥 Current streak: {current_streak} {_week_label(current_streak)}\n\n"
         f"📅 Total check-ins: {total_checkins}\n\n"
         "Have a great Monday and an awesome week! 📻",
+    )
+
+    _LOGGER.warning(
+        "MeshCore Monday diagnostic: private success reply returned "
+        "sender=%r pubkey=%r",
+        ctx.sender,
+        ctx.pubkey,
     )
 
 
