@@ -41,8 +41,8 @@ class Context:
             pubkey=data.get("pubkey_prefix", ""),
             message=data.get("message", ""),
             message_type=data.get("message_type", ""),
-            channel=data.get("channel_name", ""),
-            channel_idx=data.get("channel_index", 0),
+            channel=data.get("channel", ""),
+            channel_idx=data.get("channel_idx", 0),
             event=data,
         )
 
