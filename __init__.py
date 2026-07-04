@@ -45,7 +45,7 @@ async def async_setup_entry(
     #
     # Start messenger worker
     #
-    await messenger.start(hass)
+    await messenger.start(hass, entry)
 
     #
     # Register MeshCore listener

@@ -7,6 +7,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,13 +36,21 @@ class Messenger:
         self._worker: asyncio.Task | None = None
         self._hass: HomeAssistant | None = None
 
-    async def start(self, hass: HomeAssistant) -> None:
+    async def start(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+    ) -> None:
         """Start the background sender."""
 
         self._hass = hass
 
         if self._worker is None:
-            self._worker = hass.async_create_task(self._run())
+            self._worker = entry.async_create_background_task(
+                hass,
+                self._run(),
+                "Arlo messenger worker",
+            )
             _LOGGER.info("Messenger worker started")
 
     async def stop(self) -> None:
@@ -92,57 +101,62 @@ class Messenger:
         if self._hass is None:
             raise RuntimeError("Messenger has not been started")
 
-        while True:
+        try:
+            while True:
 
-            item = await self._queue.get()
+                item = await self._queue.get()
 
-            try:
+                try:
 
-                _LOGGER.info(
-                    "Sending to %s (attempt %d)",
-                    item.recipient,
-                    item.retries + 1,
-                )
-
-                await asyncio.sleep(TX_DELAY)
-
-                await self._hass.services.async_call(
-                    "meshcore",
-                    "send_message",
-                    {
-                        "pubkey_prefix": item.pubkey,
-                        "message": item.message,
-                    },
-                    blocking=True,
-                )
-
-                _LOGGER.info("Message sent successfully")
-
-            except Exception:
-
-                item.retries += 1
-
-                if item.retries <= MAX_RETRIES:
-
-                    _LOGGER.warning(
-                        "Send failed, retry %d/%d",
-                        item.retries,
-                        MAX_RETRIES,
+                    _LOGGER.info(
+                        "Sending to %s (attempt %d)",
+                        item.recipient,
+                        item.retries + 1,
                     )
 
-                    await asyncio.sleep(RETRY_DELAY)
-                    await self._queue.put(item)
+                    await asyncio.sleep(TX_DELAY)
 
-                else:
-
-                    _LOGGER.exception(
-                        "Message permanently failed after %d attempts",
-                        MAX_RETRIES,
+                    await self._hass.services.async_call(
+                        "meshcore",
+                        "send_message",
+                        {
+                            "pubkey_prefix": item.pubkey,
+                            "message": item.message,
+                        },
+                        blocking=True,
                     )
 
-            finally:
+                    _LOGGER.info("Message sent successfully")
 
-                self._queue.task_done()
+                except Exception:
+
+                    item.retries += 1
+
+                    if item.retries <= MAX_RETRIES:
+
+                        _LOGGER.warning(
+                            "Send failed, retry %d/%d",
+                            item.retries,
+                            MAX_RETRIES,
+                        )
+
+                        await asyncio.sleep(RETRY_DELAY)
+                        await self._queue.put(item)
+
+                    else:
+
+                        _LOGGER.exception(
+                            "Message permanently failed after %d attempts",
+                            MAX_RETRIES,
+                        )
+
+                finally:
+
+                    self._queue.task_done()
+
+        except asyncio.CancelledError:
+            _LOGGER.info("Messenger worker cancelled")
+            raise
 
 
 messenger = Messenger()
