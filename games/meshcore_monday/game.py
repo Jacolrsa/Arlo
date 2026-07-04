@@ -7,6 +7,9 @@ from datetime import date
 
 from homeassistant.util import dt as dt_util
 
+from ...const import DEFAULT_DISABLE_MONDAY_CHECK
+from ...const import DOMAIN
+from ...const import OPTION_DISABLE_MONDAY_CHECK
 from ...context import Context
 from ...storage import ArloStorage
 
@@ -30,12 +33,15 @@ async def handle_command(
         channel_check_passed,
     )
 
-    monday_check_passed = _is_monday(today)
+    disable_monday_check = _disable_monday_check(ctx)
+    monday_check_passed = disable_monday_check or _is_monday(today)
 
     _LOGGER.warning(
-        "MeshCore Monday diagnostic: local_date=%s weekday=%s monday_check_passed=%s",
+        "MeshCore Monday diagnostic: local_date=%s weekday=%s "
+        "disable_monday_check=%s monday_check_passed=%s",
         today.isoformat(),
         today.weekday(),
+        disable_monday_check,
         monday_check_passed,
     )
 
@@ -78,3 +84,17 @@ def _is_monday(day: date) -> bool:
     """Return true if the date is Monday."""
 
     return day.weekday() == 0
+
+
+def _disable_monday_check(ctx: Context) -> bool:
+    """Return true if the development Monday override is enabled."""
+
+    entries = ctx.hass.config_entries.async_entries(DOMAIN)
+
+    if not entries:
+        return DEFAULT_DISABLE_MONDAY_CHECK
+
+    return entries[0].options.get(
+        OPTION_DISABLE_MONDAY_CHECK,
+        DEFAULT_DISABLE_MONDAY_CHECK,
+    )
