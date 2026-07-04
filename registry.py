@@ -19,6 +19,7 @@ _DIRECT_COMMANDS = {
 #
 
 _CHANNEL_COMMANDS = {
+    meshcoremonday.COMMAND: meshcoremonday,
 }
 
 

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from .. import messages
 from ..context import Context
+from ..games.meshcore_monday import handle_command
 from ..storage import get_storage
 
 COMMAND = "#meshcoremonday"
@@ -15,20 +15,6 @@ async def execute(ctx: Context) -> None:
     storage_service = get_storage()
 
     if storage_service is None:
-        await messages.reply(ctx, "❌ Storage is not ready.")
         return
 
-    await storage_service.register_user(
-        pubkey=ctx.pubkey,
-        name=ctx.sender,
-    )
-
-    user = storage_service.get_user(ctx.pubkey)
-
-    await messages.reply(
-        ctx,
-        "✅ Welcome to MeshCore Monday!\n\n"
-        f"Callsign: {user['name']}\n"
-        f"Joined: {user['joined']}\n"
-        f"Total check-ins: {user['total_checkins']}"
-    )
+    await handle_command(ctx, storage_service)
